@@ -3966,10 +3966,14 @@ public abstract class RecentsView<ACTIVITY_TYPE extends StatefulActivity<STATE_T
                 mSplitSelectStateController.getActiveSplitStagePosition(), firstTaskEndingBounds,
                 secondTaskEndingBounds);
 
-        mFirstFloatingTaskView.getBoundsOnScreen(firstTaskStartingBounds);
-        mFirstFloatingTaskView.addAnimation(pendingAnimation,
-                new RectF(firstTaskStartingBounds), firstTaskEndingBounds, mFirstFloatingTaskView,
-                false /*fadeWithThumbnail*/);
+        // The first floating task view is only created by the split select init animation, which
+        // does not run when the state is set without animation (animator duration scale 0).
+        if (mFirstFloatingTaskView != null) {
+            mFirstFloatingTaskView.getBoundsOnScreen(firstTaskStartingBounds);
+            mFirstFloatingTaskView.addAnimation(pendingAnimation,
+                    new RectF(firstTaskStartingBounds), firstTaskEndingBounds,
+                    mFirstFloatingTaskView, false /*fadeWithThumbnail*/);
+        }
 
         mSecondFloatingTaskView = FloatingTaskView.getFloatingTaskView(mActivity,
                 taskView, secondTaskStartingBounds);
@@ -4039,8 +4043,10 @@ public abstract class RecentsView<ACTIVITY_TYPE extends StatefulActivity<STATE_T
                 mSplitSelectStateController.getActiveSplitStagePosition(), mTempRect);
         mTempRectF.set(mTempRect);
         // TODO(194414938) set correct corner radius
-        mFirstFloatingTaskView.updateOrientationHandler(mOrientationHandler);
-        mFirstFloatingTaskView.update(mTempRectF, /*progress=*/1f, /*windowRadius=*/0f);
+        if (mFirstFloatingTaskView != null) {
+            mFirstFloatingTaskView.updateOrientationHandler(mOrientationHandler);
+            mFirstFloatingTaskView.update(mTempRectF, /*progress=*/1f, /*windowRadius=*/0f);
+        }
 
         PagedOrientationHandler orientationHandler = getPagedOrientationHandler();
         Pair<FloatProperty, FloatProperty> taskViewsFloat =
